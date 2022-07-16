@@ -1,7 +1,7 @@
 import path from 'node:path'
-import typescript from 'rollup-plugin-typescript2'
+import ts from 'rollup-plugin-ts'
 import esbuild from 'rollup-plugin-esbuild'
-import packageJson from './package.json'
+import license from 'rollup-plugin-license'
 
 const TSCONFIG_PATH = path.resolve(__dirname, 'tsconfig.json')
 const BASE_OUTPUT = {
@@ -9,22 +9,13 @@ const BASE_OUTPUT = {
   sourcemap: true,
   name: 'dotNotationTokenizer'
 }
-
-const BASE_TYPESCRIPT_OPTIONS = {
-  tsconfig: TSCONFIG_PATH,
-  tsconfigOverride: {
-    compilerOptions: {
-      target: 'ESNext',
-      module: 'ESNext',
-      declaration: true
-    },
-    exclude: ['**/*.test.ts']
+const LICENSE_OPTIONS = {
+  banner: {
+    commentStyle: 'regular',
+    content: {
+      file: path.resolve(__dirname, 'banner.txt')
+    }
   }
-}
-
-const BASE_ESBUILD_OPTIONS = {
-  tsconfig: TSCONFIG_PATH,
-  banner: `/* dot-notation-tokenizer - v${packageJson.version}\n *\n * Released under MIT license\n * https://github.com/hammy2899/dot-notation-tokenizer\n */\n`
 }
 
 /** @type {import('rollup').RollupOptions} */
@@ -37,8 +28,10 @@ export default [
       { ...BASE_OUTPUT, file: 'dist/index.mjs', format: 'es' }
     ],
     plugins: [
-      typescript(BASE_TYPESCRIPT_OPTIONS),
-      esbuild(BASE_ESBUILD_OPTIONS)
+      esbuild({
+        tsconfig: TSCONFIG_PATH
+      }),
+      license(LICENSE_OPTIONS)
     ]
   },
   {
@@ -49,10 +42,29 @@ export default [
       format: 'umd'
     },
     plugins: [
-      typescript(BASE_TYPESCRIPT_OPTIONS),
       esbuild({
-        ...BASE_ESBUILD_OPTIONS,
+        tsconfig: TSCONFIG_PATH,
         minify: true
+      }),
+      license(LICENSE_OPTIONS)
+    ]
+  },
+  {
+    input: 'src/index.ts',
+    output: {
+      file: 'dist/index.d.ts',
+      format: 'es'
+    },
+    plugins: [
+      ts({
+        tsconfig: {
+          fileName: TSCONFIG_PATH,
+          hook: config => ({
+            ...config,
+            declaration: true,
+            emitDeclarationOnly: true
+          })
+        }
       })
     ]
   }
