@@ -14,7 +14,7 @@ Convert a dot notation string into a tokenized array.
 
 yarn
 ```bash
-yarn dot-notation-tokenizer
+yarn add dot-notation-tokenizer
 ```
 
 npm
