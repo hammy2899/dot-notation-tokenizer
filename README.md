@@ -4,11 +4,11 @@ Convert a dot notation string into a tokenized array.
 
 ---
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/hammy2899/dot-notation-tokenizer/CI)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/hammy2899/dot-notation-tokenizer/CI)](https://github.com/hammy2899/dot-notation-tokenizer/actions)
 [![Coverage Status](https://coveralls.io/repos/github/hammy2899/dot-notation-tokenizer/badge.svg?branch=main)](https://coveralls.io/github/hammy2899/dot-notation-tokenizer?branch=main)
-![npm](https://img.shields.io/npm/v/dot-notation-tokenizer)
+[![npm](https://img.shields.io/npm/v/dot-notation-tokenizer)](https://www.npmjs.com/package/dot-notation-tokenizer)
 [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
-![License](https://img.shields.io/github/license/hammy2899/dot-notation-tokenizer)
+[![License](https://img.shields.io/github/license/hammy2899/dot-notation-tokenizer)](https://github.com/hammy2899/dot-notation-tokenizer/blob/main/LICENSE)
 
 ### Installation
 
