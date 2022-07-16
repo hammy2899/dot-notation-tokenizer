@@ -17,7 +17,8 @@ const BASE_TYPESCRIPT_OPTIONS = {
       target: 'ESNext',
       module: 'ESNext',
       declaration: true
-    }
+    },
+    exclude: ['**/*.test.ts']
   }
 }
 
