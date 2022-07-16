@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "dot-notation-tokenizer",
+  "version": "0.1.0",
+  "description": "Dot notation tokenizer",
+  "keywords": [
+    "dot-notation",
+    "tokenizer",
+    "lexer"
+  ],
+  "homepage": "https://github.com/hammy2899/dot-notation-tokenizer",
+  "bugs": {
+    "url": "https://github.com/hammy2899/dot-notation-tokenizer/issues"
+  },
+  "author": {
+    "name": "Sean Hamilton",
+    "email": "opensource@hami.me",
+    "url": "https://hami.me"
+  },
+  "main": "dist/index.cjs",
+  "browser": "dist/index.min.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hammy2899/dot-notation-tokenizer.git"
+  },
+  "scripts": {
+    "lint": "eslint --ext .ts .",
+    "test": "jest",
+    "build": "rimraf dist && rollup -c rollup.config.js"
+  },
+  "devDependencies": {
+    "@jest/types": "^28.1.3",
+    "@types/jest": "^28.1.6",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "esbuild": "^0.14.49",
+    "eslint": "^7.12.1",
+    "eslint-config-hami": "^1.1.4",
+    "eslint-config-standard-with-typescript": "^21.0.1",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "jest": "^28.1.3",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.77.0",
+    "rollup-plugin-esbuild": "^4.9.1",
+    "rollup-plugin-typescript2": "^0.32.1",
+    "ts-jest": "^28.0.6",
+    "typescript": "^4.5.4"
+  },
+  "license": "MIT"
+}
