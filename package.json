@@ -17,6 +17,12 @@
     "email": "opensource@hami.me",
     "url": "https://hami.me"
   },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "yarn.lock"
+  ],
   "main": "dist/index.cjs",
   "browser": "dist/index.min.js",
   "module": "dist/index.mjs",
