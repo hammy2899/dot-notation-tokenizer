@@ -1,23 +1,22 @@
-export type TokenType = 'KEY' | 'ARRAY_INDEX'
-
-export type TokenizerParts = 'START' | 'KEY' | 'ARRAY_INDEX' | 'ARRAY_INDEX_END'
+export type TokenKind = 'PROPERTY' | 'ARRAY_INDEX'
 
 export interface BaseToken {
-  kind: TokenType
-  index: number
-  length: number
+  kind: TokenKind
+  index: {
+    start: number
+    end: number
+  }
 }
 
-export interface KeyToken extends BaseToken {
-  kind: 'KEY'
+export interface PropertyToken extends BaseToken {
+  kind: 'PROPERTY'
   value: string
 }
 
 export interface ArrayIndexToken extends BaseToken {
   kind: 'ARRAY_INDEX'
   value: number
+  text: `[${string}]`
 }
 
-export type Token = KeyToken | ArrayIndexToken
-
-export type NotationTokens = Token[]
+export type Token = PropertyToken | ArrayIndexToken

@@ -1,5 +1,15 @@
 import { tokenize } from './index'
 
+describe('should throw type error when argument is incorrect', () => {
+  test('should throw error when argument is not a string', () => {
+    expect(() => tokenize(1 as any)).toThrow('Notation argument must be a string')
+  })
+
+  test('should throw error when argument is an empty string', () => {
+    expect(() => tokenize('')).toThrow('Notation argument can\'t be an empty string')
+  })
+})
+
 describe('should throw error when notation starts with invalid character', () => {
   test('starting with .', () => {
     expect(() => tokenize('.test')).toThrow('Invalid character at start of notation')
@@ -19,7 +29,9 @@ describe('should throw error when notation starts with invalid character', () =>
 })
 
 describe('should throw error when property key is empty', () => {
-  expect(() => tokenize('test..test')).toThrow('Property key can\'t be empty')
+  test('should throw error when property key is empty', () => {
+    expect(() => tokenize('test..test')).toThrow('Property keys can\'t be empty')
+  })
 })
 
 describe('should throw error invalid character in or after an array index', () => {
@@ -41,14 +53,14 @@ describe('should throw error invalid character in or after an array index', () =
 })
 
 describe('should return array of property key tokens', () => {
-  test('"test.test.test" should return array of 3 "test" KEY tokens', () => {
+  test('"test.test.test" should return array of 3 "test" PROPERTY tokens', () => {
     const notation = 'test.test.test'
     const result = tokenize(notation)
 
     expect(result).toHaveLength(3)
-    expect(result[0].kind).toBe('KEY')
-    expect(result[1].kind).toBe('KEY')
-    expect(result[2].kind).toBe('KEY')
+    expect(result[0].kind).toBe('PROPERTY')
+    expect(result[1].kind).toBe('PROPERTY')
+    expect(result[2].kind).toBe('PROPERTY')
   })
 
   test('should correctly handle escaped tokens', () => {
@@ -68,8 +80,8 @@ describe('should return array index tokens', () => {
     const result = tokenize(notation)
 
     expect(result).toHaveLength(3)
-    expect(result[0].kind).toBe('KEY')
-    expect(result[1].kind).toBe('KEY')
+    expect(result[0].kind).toBe('PROPERTY')
+    expect(result[1].kind).toBe('PROPERTY')
 
     expect(result[2].kind).toBe('ARRAY_INDEX')
     expect(result[2].value).toBe(0)
@@ -80,8 +92,8 @@ describe('should return array index tokens', () => {
     const result = tokenize(notation)
 
     expect(result).toHaveLength(5)
-    expect(result[0].kind).toBe('KEY')
-    expect(result[1].kind).toBe('KEY')
+    expect(result[0].kind).toBe('PROPERTY')
+    expect(result[1].kind).toBe('PROPERTY')
 
     expect(result[2].kind).toBe('ARRAY_INDEX')
     expect(result[2].value).toBe(0)
@@ -104,28 +116,9 @@ describe('should be able to enter array index objects', () => {
     const result = tokenize(notation)
 
     expect(result).toHaveLength(4)
-    expect(result[0].kind).toBe('KEY')
+    expect(result[0].kind).toBe('PROPERTY')
     expect(result[1].kind).toBe('ARRAY_INDEX')
-    expect(result[2].kind).toBe('KEY')
-    expect(result[3].kind).toBe('KEY')
-  })
-})
-
-describe('should throw error when using forbidden keys', () => {
-  expect(() => tokenize('test.prototype')).toThrow('Forbidden property within notation')
-  expect(() => tokenize('test.constructor')).toThrow('Forbidden property within notation')
-  expect(() => tokenize('test.__proto__')).toThrow('Forbidden property within notation')
-
-  expect(() => tokenize('prototype.test')).toThrow('Forbidden property within notation')
-  expect(() => tokenize('constructor.test')).toThrow('Forbidden property within notation')
-  expect(() => tokenize('__proto__.test')).toThrow('Forbidden property within notation')
-
-  expect(() => tokenize('prototype[0].test')).toThrow('Forbidden property within notation')
-  expect(() => tokenize('constructor[0].test')).toThrow('Forbidden property within notation')
-  expect(() => tokenize('__proto__[0].test')).toThrow('Forbidden property within notation')
-})
-
-describe('', () => {
-  test('', () => {
+    expect(result[2].kind).toBe('PROPERTY')
+    expect(result[3].kind).toBe('PROPERTY')
   })
 })
