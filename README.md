@@ -64,33 +64,42 @@ The above notation would return the following token array.
 ```json
 [
   {
-    "kind": "KEY",
+    "kind": "PROPERTY",
     "value": "path",
-    "index": 0,
-    "length": 4
+    "index": {
+      "start": 0,
+      "end": 4
+    }
   },
   {
-    "kind": "KEY",
+    "kind": "PROPERTY",
     "value": "to",
-    "index": 5,
-    "length": 2
+    "index": {
+      "start": 5,
+      "end": 7
+    }
   },
   {
-    "kind": "KEY",
+    "kind": "PROPERTY",
     "value": "array",
-    "index": 8,
-    "length": 5
+    "index": {
+      "start": 8,
+      "end": 13
+    }
   },
   {
     "kind": "ARRAY_INDEX",
-    "value": 0,
-    "index": 14,
-    "length": 1
+    "value": 1,
+    "index": {
+      "start": 14,
+      "end": 16
+    },
+    "text": "[1]"
   }
 ]
 ```
 
-The notation used above would be used to access the second value in the following object.
+The notation used above would be used to access the second array value in the following object.
 
 The value returned would be `2`.
 
@@ -112,4 +121,35 @@ You can also chain array indexes for nested arrays like the following notation.
 
 ```text
 path.to.deep.array[1][0][4]
+```
+
+#### Escaping characters
+
+If you need to include `.`, `[` or `]` in your array key you can simply escape it by putting a slash `\` in front of the character.
+
+```text
+escaped\\.property\\[0\\].withindex
+```
+
+The above notation would return the following tokens.
+
+```json
+[
+  {
+    "kind": "PROPERTY",
+    "value": "escaped\\.property\\[0\\]",
+    "index": {
+      "start": 0,
+      "end": 22
+    }
+  },
+  {
+    "kind": "PROPERTY",
+    "value": "withindex",
+    "index": {
+      "start": 23,
+      "end": 32
+    }
+  }
+]
 ```
