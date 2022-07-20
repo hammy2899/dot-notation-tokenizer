@@ -9,21 +9,27 @@ export function tokenize (notation: string): Tokens {
 
 export function notationFromTokens (tokens: Tokens | Token[]): string {
   if (!Array.isArray(tokens)) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
+  if (tokens.length === 0) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
   if (!tokens.every(isNotationToken)) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
 
   return tokens.reduce((notation, token, index) => {
+    let value: string = token.kind === 'PROPERTY'
+      ? token.value
+      : token.text
+    const separator = index === 0
+      ? ''
+      : token.kind === 'PROPERTY'
+        ? '.'
+        : ''
+
     if (token.kind === 'PROPERTY') {
-      if (index === 0) {
-        return token.value
-          .replaceAll('.', '\\.')
-          .replaceAll('[', '\\[')
-          .replaceAll(']', '\\]')
-      }
-      return `${notation}.${token.value}`
-    } else if (token.kind === 'ARRAY_INDEX') {
-      return `${notation}[${token.value}]`
+      value = value
+        .replaceAll(/(?<!\\)\./g, '\\.')
+        .replaceAll(/(?<!\\)\[/g, '\\[')
+        .replaceAll(/(?<!\\)\]/g, '\\]')
     }
-    return ''
+
+    return `${notation}${separator}${value}`
   }, '')
 }
 
@@ -39,8 +45,11 @@ export function isNotationToken (token: any): boolean {
 
   if (token.kind !== 'PROPERTY' && token.kind !== 'ARRAY_INDEX') return false
   if (token.kind === 'PROPERTY' && typeof token.value !== 'string') return false
+  if (token.kind === 'PROPERTY' && Object.hasOwn(token, 'raw') === false) return false
+  if (token.kind === 'PROPERTY' && typeof token.raw !== 'string') return false
   if (token.kind === 'PROPERTY' && Object.hasOwn(token, 'text') === true) return false
   if (token.kind === 'ARRAY_INDEX' && typeof token.value !== 'number') return false
+  if (token.kind === 'ARRAY_INDEX' && Object.hasOwn(token, 'raw') === true) return false
   if (token.kind === 'ARRAY_INDEX' && Object.hasOwn(token, 'text') === false) return false
   if (token.kind === 'ARRAY_INDEX' && typeof token.text !== 'string') return false
   if (token.kind === 'ARRAY_INDEX' && token.text.startsWith('[') === false) return false

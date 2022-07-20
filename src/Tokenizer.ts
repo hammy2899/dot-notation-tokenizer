@@ -181,14 +181,18 @@ export class Tokenizer {
   private pushToken (kind: TokenKind, value: string | number, index: number, length: number): void {
     const token: any = {
       kind,
-      value,
+      value: typeof value === 'string'
+        ? value.replaceAll('\\', '')
+        : value,
       index: {
         start: index - length,
         end: index
       }
     }
 
-    if (token.kind === 'ARRAY_INDEX') {
+    if (kind === 'PROPERTY') {
+      token.raw = value
+    } else if (kind === 'ARRAY_INDEX') {
       token.text = `[${String(value)}]`
     }
 
