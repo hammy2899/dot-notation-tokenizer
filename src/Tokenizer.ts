@@ -9,6 +9,15 @@ enum SegmentKind {
   ARRAY_INDEX_END = 'ARRAY_INDEX_END'
 }
 
+export class Tokens extends Array<Token> {
+  readonly _notation: string
+
+  constructor (notation: string, ...tokens: Token[]) {
+    super(...tokens)
+    this._notation = notation
+  }
+}
+
 export class Tokenizer {
   private notationCharacters: string[] = []
   private segment: string = ''
@@ -26,7 +35,7 @@ export class Tokenizer {
     this.skipNext = false
   }
 
-  public analyze (notation: string): Token[] {
+  public analyze (notation: string): Tokens {
     if (typeof notation !== 'string') {
       throw new TypeError('Notation argument must be a string')
     } else if (notation === '') {
@@ -81,7 +90,7 @@ export class Tokenizer {
       throw new Error(ErrorMessage.ARRAY_INDEX_NOT_CLOSED)
     }
 
-    return this.tokens
+    return new Tokens(notation, ...this.tokens)
   }
 
   private handleSkip (character: string): void {
