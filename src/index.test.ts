@@ -1,4 +1,4 @@
-import { tokenize } from './index'
+import { notationFromTokens, tokenize, isNotationToken } from './index'
 
 describe('should throw type error when argument is incorrect', () => {
   test('should throw error when argument is not a string', () => {
@@ -65,12 +65,18 @@ describe('should return array of property key tokens', () => {
 
   test('should correctly handle escaped tokens', () => {
     const notation = 'test\\.test.test\\[0]test.test'
-    const result = tokenize(notation)
+    const result: any[] = tokenize(notation)
 
     expect(result).toHaveLength(3)
-    expect(result[0].value).toBe('test\\.test')
-    expect(result[1].value).toBe('test\\[0]test')
+
+    expect(result[0].value).toBe('test.test')
+    expect(result[0].raw).toBe('test\\.test')
+
+    expect(result[1].value).toBe('test[0]test')
+    expect(result[1].raw).toBe('test\\[0]test')
+
     expect(result[2].value).toBe('test')
+    expect(result[2].raw).toBe('test')
   })
 })
 
@@ -120,5 +126,167 @@ describe('should be able to enter array index objects', () => {
     expect(result[1].kind).toBe('ARRAY_INDEX')
     expect(result[2].kind).toBe('PROPERTY')
     expect(result[3].kind).toBe('PROPERTY')
+  })
+})
+
+describe('notationFromTokens should return the correct notation string', () => {
+  test('should return correct properties', () => {
+    const notation = 'test1.test2.test3'
+    const tokens = tokenize(notation)
+    const result = notationFromTokens(tokens)
+
+    expect(result).toBe('test1.test2.test3')
+  })
+
+  test('should return array indexes correctly', () => {
+    const notation = 'test[0].test'
+    const tokens = tokenize(notation)
+    const result = notationFromTokens(tokens)
+
+    expect(result).toBe('test[0].test')
+  })
+
+  test('should handle escaped characters', () => {
+    const notation = 'test\\.test.testing\\[0\\]'
+    const tokens = tokenize(notation)
+    const result = notationFromTokens(tokens)
+
+    expect(result).toBe('test\\.test.testing\\[0\\]')
+  })
+
+  test('should return array indexes correctly', () => {
+    const notation = 'test[0].test'
+    const tokens = tokenize(notation)
+    const result = notationFromTokens(tokens)
+
+    expect(result).toBe('test[0].test')
+  })
+})
+
+describe('notationFromTokens should throw error for invalid arguments', () => {
+  test('throw if argument is not array of tokens', () => {
+    const token: any = {
+      kind: 'PROPERTY',
+      value: 'test',
+      raw: 'test',
+      index: { start: 0, end: 4 }
+    }
+
+    expect(() => notationFromTokens('' as any)).toThrow('Tokens must be an array of notation tokens')
+    expect(() => notationFromTokens([] as any)).toThrow('Tokens must be an array of notation tokens')
+    expect(() => notationFromTokens([{}, {}] as any)).toThrow('Tokens must be an array of notation tokens')
+    expect(() => notationFromTokens([token, {}] as any)).toThrow('Tokens must be an array of notation tokens')
+  })
+})
+
+describe('isNotationToken should return true when a token is valid', () => {
+  test('should check all properties for the kind of token', () => {
+    const propToken: any = {
+      kind: 'PROPERTY',
+      value: 'test',
+      raw: 'test',
+      index: {
+        start: 0,
+        end: 4
+      }
+    }
+
+    expect(isNotationToken(propToken)).toBe(true)
+
+    propToken.kind = 'unknown'
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.kind = 'PROPERTY'
+
+    delete propToken.value
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.value = 'test'
+
+    propToken.value = 2
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.value = 'test'
+
+    propToken.raw = 2
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.raw = 'test'
+
+    delete propToken.raw
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.raw = 'test'
+
+    propToken.text = 'test'
+    expect(isNotationToken(propToken)).toBe(false)
+    delete propToken.text
+
+    delete propToken.index
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.index = { start: 0, end: 4 }
+
+    delete propToken.index.start
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.index = { start: 0, end: 4 }
+
+    delete propToken.index.end
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.index = { start: 0, end: 4 }
+
+    propToken.index.start = 'test'
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.index = { start: 0, end: 4 }
+
+    propToken.index.end = 'test'
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.index = { start: 0, end: 4 }
+
+    const arrayToken: any = {
+      kind: 'ARRAY_INDEX',
+      value: 1,
+      text: '[1]',
+      index: {
+        start: 0,
+        end: 3
+      }
+    }
+
+    expect(isNotationToken(arrayToken)).toBe(true)
+
+    arrayToken.kind = 'unknown'
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.kind = 'ARRAY_INDEX'
+
+    arrayToken.value = '1'
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.value = 0
+
+    delete arrayToken.value
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.value = 0
+
+    arrayToken.raw = 'test'
+    expect(isNotationToken(arrayToken)).toBe(false)
+    delete arrayToken.raw
+
+    arrayToken.text = 'test'
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.text = '[0]'
+
+    arrayToken.text = 1
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.text = '[0]'
+
+    delete arrayToken.text
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.text = '[0]'
+
+    arrayToken.text = '0]'
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.text = '[0]'
+
+    arrayToken.text = '[0'
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.text = '[0]'
+
+    arrayToken.text = '[1]'
+    expect(isNotationToken(arrayToken)).toBe(false)
+    arrayToken.text = '[0]'
   })
 })
