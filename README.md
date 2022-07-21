@@ -69,7 +69,8 @@ The above notation would return the following token array.
     "index": {
       "start": 0,
       "end": 4
-    }
+    },
+    "raw": "path"
   },
   {
     "kind": "PROPERTY",
@@ -77,7 +78,8 @@ The above notation would return the following token array.
     "index": {
       "start": 5,
       "end": 7
-    }
+    },
+    "raw": "to"
   },
   {
     "kind": "PROPERTY",
@@ -85,7 +87,8 @@ The above notation would return the following token array.
     "index": {
       "start": 8,
       "end": 13
-    }
+    },
+    "raw": "array"
   },
   {
     "kind": "ARRAY_INDEX",
@@ -137,11 +140,12 @@ The above notation would return the following tokens.
 [
   {
     "kind": "PROPERTY",
-    "value": "escaped\\.property\\[0\\]",
+    "value": "escaped.property[0]",
     "index": {
       "start": 0,
       "end": 22
-    }
+    },
+    "raw": "escaped\\.property\\[0\\]"
   },
   {
     "kind": "PROPERTY",
@@ -149,7 +153,8 @@ The above notation would return the following tokens.
     "index": {
       "start": 23,
       "end": 32
-    }
+    },
+    "raw": "withindex"
   }
 ]
 ```
