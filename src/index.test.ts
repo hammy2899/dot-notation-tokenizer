@@ -1,4 +1,4 @@
-import { notationFromTokens, tokenize, isNotationToken } from './index'
+import { notationFromTokens, tokenize, isNotationToken, tokensFromPropertyKeys } from './index'
 
 describe('should throw type error when argument is incorrect', () => {
   test('should throw error when argument is not a string', () => {
@@ -179,6 +179,15 @@ describe('notationFromTokens should throw error for invalid arguments', () => {
   })
 })
 
+describe('isNotationToken should return false for invalid arguments', () => {
+  test('should skip checks if arg isn\'t even an object', () => {
+    expect(isNotationToken(undefined)).toBe(false)
+    expect(isNotationToken(null)).toBe(false)
+    expect(isNotationToken([])).toBe(false)
+    expect(isNotationToken('')).toBe(false)
+  })
+})
+
 describe('isNotationToken should return true when a token is valid', () => {
   test('should check all properties for the kind of token', () => {
     const propToken: any = {
@@ -218,6 +227,10 @@ describe('isNotationToken should return true when a token is valid', () => {
     delete propToken.text
 
     delete propToken.index
+    expect(isNotationToken(propToken)).toBe(false)
+    propToken.index = { start: 0, end: 4 }
+
+    propToken.index = undefined
     expect(isNotationToken(propToken)).toBe(false)
     propToken.index = { start: 0, end: 4 }
 
@@ -288,5 +301,36 @@ describe('isNotationToken should return true when a token is valid', () => {
     arrayToken.text = '[1]'
     expect(isNotationToken(arrayToken)).toBe(false)
     arrayToken.text = '[0]'
+  })
+})
+
+describe('tokensFromPropertyKeys should throw error for invalid arguments', () => {
+  test('throw if argument is not array of strings', () => {
+    expect(() => tokensFromPropertyKeys('' as any)).toThrow('Keys must be an array of properties as strings')
+    expect(() => tokensFromPropertyKeys([] as any)).toThrow('Keys must be an array of properties as strings')
+    expect(() => tokensFromPropertyKeys([{}, {}] as any)).toThrow('Keys must be an array of properties as strings')
+    expect(() => tokensFromPropertyKeys(['test', {}] as any)).toThrow('Keys must be an array of properties as strings')
+    expect(() => tokensFromPropertyKeys(['test', ''] as any)).toThrow('Keys must be an array of properties as strings')
+  })
+})
+
+describe('tokensFromPropertyKeys return Tokens for keys', () => {
+  test('should return tokens for simple keys', () => {
+    const keys = ['a', 'b', 'c']
+    const tokens = tokensFromPropertyKeys(keys)
+
+    expect(tokens).toHaveLength(3)
+    expect(tokens.every(token => token.kind === 'PROPERTY')).toBe(true)
+    expect(tokens.every((token: any) => keys.includes(token.value))).toBe(true)
+  })
+
+  test('should return tokens with escaped characters', () => {
+    const keys = ['a', 'b.c', 'd']
+    const tokens = tokensFromPropertyKeys(keys)
+
+    expect(tokens).toHaveLength(3)
+    expect(tokens.every(token => token.kind === 'PROPERTY')).toBe(true)
+    expect(tokens.every((token: any) => keys.includes(token.value))).toBe(true)
+    expect((tokens[1] as any).raw).toBe('b\\.c')
   })
 })

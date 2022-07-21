@@ -7,6 +7,24 @@ export function tokenize (notation: string): Tokens {
   return tokenizer.analyze(notation)
 }
 
+export function tokensFromPropertyKeys (keys: string[]): Tokens {
+  if (!Array.isArray(keys)) throw new TypeError(ErrorMessage.KEYS_ARG_MUST_BE_STRINGS)
+  if (keys.length === 0) throw new TypeError(ErrorMessage.KEYS_ARG_MUST_BE_STRINGS)
+  if (!keys.every(key => typeof key === 'string')) throw new TypeError(ErrorMessage.KEYS_ARG_MUST_BE_STRINGS)
+  if (!keys.every(key => key !== '')) throw new TypeError(ErrorMessage.KEYS_ARG_MUST_BE_STRINGS)
+
+  const notation = keys
+    .map(key =>
+      key
+        .replaceAll(/(?<!\\)\./g, '\\.')
+        .replaceAll(/(?<!\\)\[/g, '\\[')
+        .replaceAll(/(?<!\\)\]/g, '\\]')
+    )
+    .join('.')
+
+  return tokenize(notation)
+}
+
 export function notationFromTokens (tokens: Tokens | Token[]): string {
   if (!Array.isArray(tokens)) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
   if (tokens.length === 0) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
@@ -34,7 +52,7 @@ export function notationFromTokens (tokens: Tokens | Token[]): string {
 }
 
 export function isNotationToken (token: any): boolean {
-  if (token === undefined || token === null || Array.isArray(token)) return false
+  if (token === undefined || token === null || Array.isArray(token) || typeof token !== 'object') return false
 
   if (!Object.hasOwn(token, 'kind')) return false
   if (!Object.hasOwn(token, 'value')) return false
