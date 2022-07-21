@@ -7,6 +7,26 @@ export function tokenize (notation: string): Tokens {
   return tokenizer.analyze(notation)
 }
 
+export function escapeProperty (property: string): string {
+  if (typeof property !== 'string') throw new TypeError(ErrorMessage.PROPERTY_ARG_MUST_BE_STRING)
+  if (property === '') throw new TypeError(ErrorMessage.PROPERTY_ARG_MUST_BE_STRING)
+
+  return property
+    .replaceAll(/(?<!\\)\./g, '\\.')
+    .replaceAll(/(?<!\\)\[/g, '\\[')
+    .replaceAll(/(?<!\\)\]/g, '\\]')
+}
+
+export function unescapeProperty (property: string): string {
+  if (typeof property !== 'string') throw new TypeError(ErrorMessage.PROPERTY_ARG_MUST_BE_STRING)
+  if (property === '') throw new TypeError(ErrorMessage.PROPERTY_ARG_MUST_BE_STRING)
+
+  return property
+    .replaceAll(/\\\./g, '.')
+    .replaceAll(/\\\[/g, '[')
+    .replaceAll(/\\\]/g, ']')
+}
+
 export function tokensFromPropertyKeys (keys: string[]): Tokens {
   if (!Array.isArray(keys)) throw new TypeError(ErrorMessage.KEYS_ARG_MUST_BE_STRINGS)
   if (keys.length === 0) throw new TypeError(ErrorMessage.KEYS_ARG_MUST_BE_STRINGS)
@@ -14,12 +34,7 @@ export function tokensFromPropertyKeys (keys: string[]): Tokens {
   if (!keys.every(key => key !== '')) throw new TypeError(ErrorMessage.KEYS_ARG_MUST_BE_STRINGS)
 
   const notation = keys
-    .map(key =>
-      key
-        .replaceAll(/(?<!\\)\./g, '\\.')
-        .replaceAll(/(?<!\\)\[/g, '\\[')
-        .replaceAll(/(?<!\\)\]/g, '\\]')
-    )
+    .map(key => escapeProperty(key))
     .join('.')
 
   return tokenize(notation)
@@ -31,21 +46,14 @@ export function notationFromTokens (tokens: Tokens | Token[]): string {
   if (!tokens.every(token => isNotationToken(token))) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
 
   return tokens.reduce((notation, token, index) => {
-    let value: string = token.kind === 'PROPERTY'
-      ? token.value
+    const value: string = token.kind === 'PROPERTY'
+      ? token.escaped
       : token.text
     const separator = index === 0
       ? ''
       : token.kind === 'PROPERTY'
         ? '.'
         : ''
-
-    if (token.kind === 'PROPERTY') {
-      value = value
-        .replaceAll(/(?<!\\)\./g, '\\.')
-        .replaceAll(/(?<!\\)\[/g, '\\[')
-        .replaceAll(/(?<!\\)\]/g, '\\]')
-    }
 
     return `${notation}${separator}${value}`
   }, '')
@@ -65,11 +73,11 @@ export function isNotationToken (token: any): boolean {
 
   if (token.kind !== 'PROPERTY' && token.kind !== 'ARRAY_INDEX') return false
   if (token.kind === 'PROPERTY' && typeof token.value !== 'string') return false
-  if (token.kind === 'PROPERTY' && !Object.hasOwn(token, 'raw')) return false
-  if (token.kind === 'PROPERTY' && typeof token.raw !== 'string') return false
+  if (token.kind === 'PROPERTY' && !Object.hasOwn(token, 'escaped')) return false
+  if (token.kind === 'PROPERTY' && typeof token.escaped !== 'string') return false
   if (token.kind === 'PROPERTY' && Object.hasOwn(token, 'text')) return false
   if (token.kind === 'ARRAY_INDEX' && typeof token.value !== 'number') return false
-  if (token.kind === 'ARRAY_INDEX' && Object.hasOwn(token, 'raw')) return false
+  if (token.kind === 'ARRAY_INDEX' && Object.hasOwn(token, 'escaped')) return false
   if (token.kind === 'ARRAY_INDEX' && !Object.hasOwn(token, 'text')) return false
   if (token.kind === 'ARRAY_INDEX' && typeof token.text !== 'string') return false
   if (token.kind === 'ARRAY_INDEX' && token.text.startsWith('[') === false) return false

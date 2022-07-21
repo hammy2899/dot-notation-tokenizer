@@ -1,4 +1,4 @@
-import { notationFromTokens, tokenize, isNotationToken, tokensFromPropertyKeys } from './index'
+import { notationFromTokens, tokenize, isNotationToken, tokensFromPropertyKeys, escapeProperty, unescapeProperty } from './index'
 
 describe('should throw type error when argument is incorrect', () => {
   test('should throw error when argument is not a string', () => {
@@ -70,13 +70,13 @@ describe('should return array of property key tokens', () => {
     expect(result).toHaveLength(3)
 
     expect(result[0].value).toBe('test.test')
-    expect(result[0].raw).toBe('test\\.test')
+    expect(result[0].escaped).toBe('test\\.test')
 
     expect(result[1].value).toBe('test[0]test')
-    expect(result[1].raw).toBe('test\\[0]test')
+    expect(result[1].escaped).toBe('test\\[0\\]test')
 
     expect(result[2].value).toBe('test')
-    expect(result[2].raw).toBe('test')
+    expect(result[2].escaped).toBe('test')
   })
 })
 
@@ -193,7 +193,7 @@ describe('isNotationToken should return true when a token is valid', () => {
     const propToken: any = {
       kind: 'PROPERTY',
       value: 'test',
-      raw: 'test',
+      escaped: 'test',
       index: {
         start: 0,
         end: 4
@@ -214,13 +214,13 @@ describe('isNotationToken should return true when a token is valid', () => {
     expect(isNotationToken(propToken)).toBe(false)
     propToken.value = 'test'
 
-    propToken.raw = 2
+    propToken.escaped = 2
     expect(isNotationToken(propToken)).toBe(false)
-    propToken.raw = 'test'
+    propToken.escaped = 'test'
 
-    delete propToken.raw
+    delete propToken.escaped
     expect(isNotationToken(propToken)).toBe(false)
-    propToken.raw = 'test'
+    propToken.escaped = 'test'
 
     propToken.text = 'test'
     expect(isNotationToken(propToken)).toBe(false)
@@ -274,9 +274,9 @@ describe('isNotationToken should return true when a token is valid', () => {
     expect(isNotationToken(arrayToken)).toBe(false)
     arrayToken.value = 0
 
-    arrayToken.raw = 'test'
+    arrayToken.escaped = 'test'
     expect(isNotationToken(arrayToken)).toBe(false)
-    delete arrayToken.raw
+    delete arrayToken.escaped
 
     arrayToken.text = 'test'
     expect(isNotationToken(arrayToken)).toBe(false)
@@ -331,6 +331,39 @@ describe('tokensFromPropertyKeys return Tokens for keys', () => {
     expect(tokens).toHaveLength(3)
     expect(tokens.every(token => token.kind === 'PROPERTY')).toBe(true)
     expect(tokens.every((token: any) => keys.includes(token.value))).toBe(true)
-    expect((tokens[1] as any).raw).toBe('b\\.c')
+    expect((tokens[1] as any).escaped).toBe('b\\.c')
+    expect((tokens[1] as any).value).toBe('b.c')
+  })
+})
+
+describe('escape functions should throw error for invalid arguments', () => {
+  test('escapeProperty should throw if argument is not a string', () => {
+    expect(() => escapeProperty('' as any)).toThrow('Property must be a string')
+    expect(() => escapeProperty([] as any)).toThrow('Property must be a string')
+    expect(() => escapeProperty([{}, {}] as any)).toThrow('Property must be a string')
+    expect(() => escapeProperty(['test', {}] as any)).toThrow('Property must be a string')
+    expect(() => escapeProperty(['test', ''] as any)).toThrow('Property must be a string')
+  })
+
+  test('unescapeProperty should throw if argument is not a string', () => {
+    expect(() => unescapeProperty('' as any)).toThrow('Property must be a string')
+    expect(() => unescapeProperty([] as any)).toThrow('Property must be a string')
+    expect(() => unescapeProperty([{}, {}] as any)).toThrow('Property must be a string')
+    expect(() => unescapeProperty(['test', {}] as any)).toThrow('Property must be a string')
+    expect(() => unescapeProperty(['test', ''] as any)).toThrow('Property must be a string')
+  })
+})
+
+describe('escape functions should work correctly', () => {
+  test('escapeProperty should escape token characters', () => {
+    expect(escapeProperty('test.test')).toBe('test\\.test')
+    expect(escapeProperty('test[0]')).toBe('test\\[0\\]')
+    expect(escapeProperty('test.test[0]')).toBe('test\\.test\\[0\\]')
+  })
+
+  test('unescapeProperty should remove \\ from escaped token characters', () => {
+    expect(unescapeProperty('test\\.test')).toBe('test.test')
+    expect(unescapeProperty('test\\[0\\]')).toBe('test[0]')
+    expect(unescapeProperty('test\\.test\\[0\\]')).toBe('test.test[0]')
   })
 })

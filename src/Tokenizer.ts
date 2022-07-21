@@ -1,5 +1,6 @@
 import { FORBIDDEN_START_CHARACTERS, VALID_INDEX_CHARACTERS } from './consts'
 import { ErrorMessage } from './errors'
+import { escapeProperty, unescapeProperty } from './index'
 import type { Token, TokenKind } from './types'
 
 enum SegmentKind {
@@ -178,11 +179,13 @@ export class Tokenizer {
     }
   }
 
+  private pushToken (kind: 'PROPERTY', value: string, index: number, length: number): void
+  private pushToken (kind: 'ARRAY_INDEX', value: number, index: number, length: number): void
   private pushToken (kind: TokenKind, value: string | number, index: number, length: number): void {
     const token: any = {
       kind,
-      value: typeof value === 'string'
-        ? value.replaceAll('\\', '')
+      value: kind === 'PROPERTY'
+        ? unescapeProperty(value as string)
         : value,
       index: {
         start: index - length,
@@ -191,7 +194,7 @@ export class Tokenizer {
     }
 
     if (kind === 'PROPERTY') {
-      token.raw = value
+      token.escaped = escapeProperty(value as string)
     } else if (kind === 'ARRAY_INDEX') {
       token.text = `[${String(value)}]`
     }

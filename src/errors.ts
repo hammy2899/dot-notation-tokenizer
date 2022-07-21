@@ -5,5 +5,6 @@ export const ErrorMessage = {
   PROPERTY_CANT_BE_EMPTY: 'Property keys can\'t be empty',
   ARRAY_INDEX_NOT_CLOSED: 'Array index was not closed',
   TOKENS_ARG_MUST_BE_TOKENS: 'Tokens must be an array of notation tokens',
-  KEYS_ARG_MUST_BE_STRINGS: 'Keys must be an array of properties as strings'
+  KEYS_ARG_MUST_BE_STRINGS: 'Keys must be an array of properties as strings',
+  PROPERTY_ARG_MUST_BE_STRING: 'Property must be a string'
 }

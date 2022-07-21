@@ -11,7 +11,7 @@ export interface BaseToken {
 export interface PropertyToken extends BaseToken {
   kind: 'PROPERTY'
   value: string
-  raw: string
+  escaped: string
 }
 
 export interface ArrayIndexToken extends BaseToken {
