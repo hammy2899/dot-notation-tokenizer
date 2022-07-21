@@ -49,6 +49,27 @@ const { tokenize } = require('dot-notation-tokenizer')
 tokenize('dot.notation')
 ```
 
+#### Extra exported functions and types
+
+```typescript
+import {
+  notationFromTokens,     // convert tokens array (returned from tokenize) into a dot notation string
+  isNotationToken,        // check if a value is a valid token
+  tokensFromPropertyKeys, // convert an array of property keys into an array of tokens
+  escapeProperty,         // escape token characters
+  unescapeProperty,       // remove \ from escaped token characters
+  Tokens                  // this is actually a class which extends Array and contains the _notation property
+} from 'dot-notation-tokenizer'
+// Most of these functions are used internally however they can also prove useful
+
+import type {
+  TokenKind,        // either 'PROPERTY' or 'ARRAY_INDEX'
+  PropertyToken,    // interface with properties for a property token
+  ArrayIndexToken,  // interface with properties for an array index token
+  Token             // either PropertyToken or ArrayIndexToken
+} from 'dot-notation-tokenizer'
+```
+
 <br />
 
 ### Explanation
@@ -70,7 +91,7 @@ The above notation would return the following token array.
       "start": 0,
       "end": 4
     },
-    "raw": "path"
+    "escaped": "path"
   },
   {
     "kind": "PROPERTY",
@@ -79,7 +100,7 @@ The above notation would return the following token array.
       "start": 5,
       "end": 7
     },
-    "raw": "to"
+    "escaped": "to"
   },
   {
     "kind": "PROPERTY",
@@ -88,7 +109,7 @@ The above notation would return the following token array.
       "start": 8,
       "end": 13
     },
-    "raw": "array"
+    "escaped": "array"
   },
   {
     "kind": "ARRAY_INDEX",
@@ -145,7 +166,7 @@ The above notation would return the following tokens.
       "start": 0,
       "end": 22
     },
-    "raw": "escaped\\.property\\[0\\]"
+    "escaped": "escaped\\.property\\[0\\]"
   },
   {
     "kind": "PROPERTY",
@@ -154,7 +175,7 @@ The above notation would return the following tokens.
       "start": 23,
       "end": 32
     },
-    "raw": "withindex"
+    "escaped": "withindex"
   }
 ]
 ```
