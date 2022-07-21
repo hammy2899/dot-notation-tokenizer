@@ -10,7 +10,7 @@ export function tokenize (notation: string): Tokens {
 export function notationFromTokens (tokens: Tokens | Token[]): string {
   if (!Array.isArray(tokens)) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
   if (tokens.length === 0) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
-  if (!tokens.every(isNotationToken)) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
+  if (!tokens.every(token => isNotationToken(token))) throw new TypeError(ErrorMessage.TOKENS_ARG_MUST_BE_TOKENS)
 
   return tokens.reduce((notation, token, index) => {
     let value: string = token.kind === 'PROPERTY'
@@ -34,23 +34,25 @@ export function notationFromTokens (tokens: Tokens | Token[]): string {
 }
 
 export function isNotationToken (token: any): boolean {
-  if (Object.hasOwn(token, 'kind') === false) return false
-  if (Object.hasOwn(token, 'value') === false) return false
-  if (Object.hasOwn(token, 'index') === false) return false
-  const index = token.index
-  if (Object.hasOwn(index, 'start') === false) return false
-  if (Object.hasOwn(index, 'end') === false) return false
+  if (token === undefined || token === null || Array.isArray(token)) return false
+
+  if (!Object.hasOwn(token, 'kind')) return false
+  if (!Object.hasOwn(token, 'value')) return false
+  if (!Object.hasOwn(token, 'index')) return false
+  const index = token.index ?? {}
+  if (!Object.hasOwn(index, 'start')) return false
+  if (!Object.hasOwn(index, 'end')) return false
   if (typeof index.start !== 'number') return false
   if (typeof index.end !== 'number') return false
 
   if (token.kind !== 'PROPERTY' && token.kind !== 'ARRAY_INDEX') return false
   if (token.kind === 'PROPERTY' && typeof token.value !== 'string') return false
-  if (token.kind === 'PROPERTY' && Object.hasOwn(token, 'raw') === false) return false
+  if (token.kind === 'PROPERTY' && !Object.hasOwn(token, 'raw')) return false
   if (token.kind === 'PROPERTY' && typeof token.raw !== 'string') return false
-  if (token.kind === 'PROPERTY' && Object.hasOwn(token, 'text') === true) return false
+  if (token.kind === 'PROPERTY' && Object.hasOwn(token, 'text')) return false
   if (token.kind === 'ARRAY_INDEX' && typeof token.value !== 'number') return false
-  if (token.kind === 'ARRAY_INDEX' && Object.hasOwn(token, 'raw') === true) return false
-  if (token.kind === 'ARRAY_INDEX' && Object.hasOwn(token, 'text') === false) return false
+  if (token.kind === 'ARRAY_INDEX' && Object.hasOwn(token, 'raw')) return false
+  if (token.kind === 'ARRAY_INDEX' && !Object.hasOwn(token, 'text')) return false
   if (token.kind === 'ARRAY_INDEX' && typeof token.text !== 'string') return false
   if (token.kind === 'ARRAY_INDEX' && token.text.startsWith('[') === false) return false
   if (token.kind === 'ARRAY_INDEX' && token.text.endsWith(']') === false) return false
